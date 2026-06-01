@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Color Dice - 30 Dice Max with Rolling Sound FX & History</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, 'Arial', sans-serif;
+            background: linear-gradient(145deg, #0a2f1a 0%, #051a0a 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(6px);
+            border-radius: 56px;
+            padding: 24px 28px 36px;
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 1300px;
+            transition: all 0.2s;
+        }
+
+        h1 {
+            color: #FFEFC0;
+            font-size: 2.3rem;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+            text-shadow: 0 4px 12px #00000080;
+            font-weight: 800;
+        }
+
+        .sub {
+            color: #e2f5db;
+            margin-bottom: 18px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-bottom: 1px dashed #ffcd7e;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        /* controls area */
+        .controls {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 80px;
+            padding: 10px 24px;
+            margin: 10px 0 25px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            backdrop-filter: blur(4px);
+        }
+
+        .dice-count-selector {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            background: #1e3a2fe0;
+            padding: 6px 28px;
+            border-radius: 60px;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.3), 0 6px 12px rgba(0,0,0,0.4);
+        }
+
+        .dice-count-selector label {
+            font-weight: bold;
+            color: #FFF0BD;
+            font-size: 1.25rem;
+            letter-spacing: 0.5px;
+        }
+
+        select {
+            background: #2c2a24;
+            color: #FFE5A3;
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 8px 20px;
+            border-radius: 48px;
+            border: 1px solid #ffcd6b;
+            cursor: pointer;
+            outline: none;
+            font-family: monospace;
+            transition: 0.1s linear;
+        }
+
+        select:hover {
+            background: #423e34;
+            border-color: #ffb83b;
+        }
+
+        .info-badge {
+            background: #00000099;
+            padding: 6px 20px;
+            border-radius: 40px;
+            color: #f9f2cf;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-badge span {
+            background: #ffb347;
+            color: #1e3a2f;
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* dice grid */
+        .dice-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 16px;
+            margin: 25px 0 28px;
+            min-height: 200px;
+            max-height: 45vh;
+            overflow-y: auto;
+            padding: 12px 10px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 48px;
+            transition: all 0.2s;
+        }
+
+        /* ========== AUTOMATIC DICE SIZING BASED ON QUANTITY ========== */
+        .dice {
+            width: 80px;
+            height: 80px;
+            border-radius: 18px;
+            border: 3px solid #FFF8E7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #c41e3a;
+            box-shadow: 0 12px 18px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255,255,255,0.3);
+            transition: transform 0.08s ease, box-shadow 0.1s, width 0.2s ease, height 0.2s ease;
+            flex-shrink: 0;
+        }
+        
+        .dice-grid[data-dice-count="7"] .dice,
+        .dice-grid[data-dice-count="8"] .dice,
+        .dice-grid[data-dice-count="9"] .dice,
+        .dice-grid[data-dice-count="10"] .dice,
+        .dice-grid[data-dice-count="11"] .dice,
+        .dice-grid[data-dice-count="12"] .dice {
+            width: 70px;
+            height: 70px;
+            border-radius: 16px;
+        }
+        
+        .dice-grid[data-dice-count="13"] .dice,
+        .dice-grid[data-dice-count="14"] .dice,
+        .dice-grid[data-dice-count="15"] .dice,
+        .dice-grid[data-dice-count="16"] .dice,
+        .dice-grid[data-dice-count="17"] .dice,
+        .dice-grid[data-dice-count="18"] .dice {
+            width: 62px;
+            height: 62px;
+            border-radius: 14px;
+        }
+        
+        .dice-grid[data-dice-count="19"] .dice,
+        .dice-grid[data-dice-count="20"] .dice,
+        .dice-grid[data-dice-count="21"] .dice,
+        .dice-grid[data-dice-count="22"] .dice,
+        .dice-grid[data-dice-count="23"] .dice,
+        .dice-grid[data-dice-count="24"] .dice {
+            width: 55px;
+            height: 55px;
+            border-radius: 12px;
+        }
+        
+        .dice-grid[data-dice-count="25"] .dice,
+        .dice-grid[data-dice-count="26"] .dice,
+        .dice-grid[data-dice-count="27"] .dice,
+        .dice-grid[data-dice-count="28"] .dice,
+        .dice-grid[data-dice-count="29"] .dice,
+        .dice-grid[data-dice-count="30"] .dice {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+        }
+        
+        .dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+            transition: 0.05s, width 0.2s ease, height 0.2s ease;
+        }
+        
+        .dice-grid[data-dice-count="7"] .dot,
+        .dice-grid[data-dice-count="8"] .dot,
+        .dice-grid[data-dice-count="9"] .dot,
+        .dice-grid[data-dice-count="10"] .dot,
+        .dice-grid[data-dice-count="11"] .dot,
+        .dice-grid[data-dice-count="12"] .dot {
+            width: 19px;
+            height: 19px;
+        }
+        
+        .dice-grid[data-dice-count="13"] .dot,
+        .dice-grid[data-dice-count="14"] .dot,
+        .dice-grid[data-dice-count="15"] .dot,
+        .dice-grid[data-dice-count="16"] .dot,
+        .dice-grid[data-dice-count="17"] .dot,
+        .dice-grid[data-dice-count="18"] .dot {
+            width: 17px;
+            height: 17px;
+        }
+        
+        .dice-grid[data-dice-count="19"] .dot,
+        .dice-grid[data-dice-count="20"] .dot,
+        .dice-grid[data-dice-count="21"] .dot,
+        .dice-grid[data-dice-count="22"] .dot,
+        .dice-grid[data-dice-count="23"] .dot,
+        .dice-grid[data-dice-count="24"] .dot {
+            width: 15px;
+            height: 15px;
+        }
+        
+        .dice-grid[data-dice-count="25"] .dot,
+        .dice-grid[data-dice-count="26"] .dot,
+        .dice-grid[data-dice-count="27"] .dot,
+        .dice-grid[data-dice-count="28"] .dot,
+        .dice-grid[data-dice-count="29"] .dot,
+        .dice-grid[data-dice-count="30"] .dot {
+            width: 13px;
+            height: 13px;
+        }
+
+        @media (max-width: 779px) {
+            .dice { width: 65px; height: 65px; }
+            .dice-grid[data-dice-count="7"] .dice,
+            .dice-grid[data-dice-count="8"] .dice,
+            .dice-grid[data-dice-count="9"] .dice,
+            .dice-grid[data-dice-count="10"] .dice,
+            .dice-grid[data-dice-count="11"] .dice,
+            .dice-grid[data-dice-count="12"] .dice { width: 58px; height: 58px; }
+            .dice-grid[data-dice-count="13"] .dice,
+            .dice-grid[data-dice-count="14"] .dice,
+            .dice-grid[data-dice-count="15"] .dice,
+            .dice-grid[data-dice-count="16"] .dice,
+            .dice-grid[data-dice-count="17"] .dice,
+            .dice-grid[data-dice-count="18"] .dice { width: 52px; height: 52px; }
+            .dice-grid[data-dice-count="19"] .dice,
+            .dice-grid[data-dice-count="20"] .dice,
+            .dice-grid[data-dice-count="21"] .dice,
+            .dice-grid[data-dice-count="22"] .dice,
+            .dice-grid[data-dice-count="23"] .dice,
+            .dice-grid[data-dice-count="24"] .dice { width: 46px; height: 46px; }
+            .dice-grid[data-dice-count="25"] .dice,
+            .dice-grid[data-dice-count="26"] .dice,
+            .dice-grid[data-dice-count="27"] .dice,
+            .dice-grid[data-dice-count="28"] .dice,
+            .dice-grid[data-dice-count="29"] .dice,
+            .dice-grid[data-dice-count="30"] .dice { width: 42px; height: 42px; }
+            .dot { width: 18px; height: 18px; }
+            .dice-grid[data-dice-count="7"] .dot { width: 16px; height: 16px; }
+            .dice-grid[data-dice-count="13"] .dot { width: 14px; height: 14px; }
+            .dice-grid[data-dice-count="19"] .dot { width: 12px; height: 12px; }
+            .dice-grid[data-dice-count="25"] .dot { width: 11px; height: 11px; }
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 60px;
+            background: radial-gradient(circle at 30% 10%, #ffdf7e, #ffa047);
+            font-size: 28px;
+            font-weight: bold;
+            color: #251f12;
+            cursor: pointer;
+            transition: transform 0.08s, filter 0.2s;
+            box-shadow: 0 9px 0 #8b5a2b;
+            letter-spacing: 3px;
+            font-family: inherit;
+        }
+
+        button:active {
+            transform: translateY(3px);
+            box-shadow: 0 5px 0 #8b5a2b;
+        }
+
+        #result {
+            background: #0a1f12e0;
+            margin-top: 22px;
+            padding: 14px 16px;
+            border-radius: 50px;
+            font-size: 1.15rem;
+            font-weight: bold;
+            color: #FFF7E0;
+            backdrop-filter: blur(6px);
+            word-break: break-word;
+            line-height: 1.4;
+            border: 1px solid #ffdf8c;
+            max-height: 110px;
+            overflow-y: auto;
+        }
+
+        /* HISTORY PANEL */
+        .history-container {
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 32px;
+            padding: 12px 16px;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 205, 107, 0.4);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            color: #FFEFC0;
+            font-weight: bold;
+            font-size: 1rem;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(255, 205, 107, 0.5);
+        }
+
+        .history-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .history-list {
+            max-height: 160px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding-right: 6px;
+        }
+
+        .history-item {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 24px;
+            padding: 8px 14px;
+            font-size: 0.85rem;
+            color: #FFE5B4;
+            border-left: 4px solid #ffcd6b;
+            text-align: left;
+            font-family: monospace;
+            word-break: break-word;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .history-item strong {
+            color: #ffd966;
+        }
+
+        .history-color-preview {
+            display: inline-flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .color-dot-mini {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            display: inline-block;
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .history-text {
+            flex: 1;
+        }
+
+        .history-list::-webkit-scrollbar {
+            width: 5px;
+        }
+        .history-list::-webkit-scrollbar-track {
+            background: #1c3b2a;
+            border-radius: 10px;
+        }
+        .history-list::-webkit-scrollbar-thumb {
+            background: #ffcd6b;
+            border-radius: 10px;
+        }
+
+        @keyframes crunchyShake {
+            0% { transform: translate(0px, 0px) rotate(0deg); }
+            20% { transform: translate(2px, -2px) rotate(2deg); }
+            40% { transform: translate(-2px, 1px) rotate(-2deg); }
+            60% { transform: translate(1px, 2px) rotate(1deg); }
+            80% { transform: translate(-1px, -1px) rotate(-1deg); }
+            100% { transform: translate(0,0) rotate(0); }
+        }
+
+        .rolling-animation {
+            animation: crunchyShake 0.08s infinite;
+        }
+
+        .dice-grid::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .dice-grid::-webkit-scrollbar-track {
+            background: #1c3b2a;
+            border-radius: 20px;
+        }
+        .dice-grid::-webkit-scrollbar-thumb {
+            background: #ffcd6b;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🎲 COLOR DICE · BY BUSH GAMING 🎲</h1>
+
+    <div class="controls">
+        <div class="dice-count-selector">
+            <label>🎲 Number of Dice:</label>
+            <select id="diceQuantitySelect"></select>
+        </div>
+        <div class="info-badge">
+            <span> 🎲 </span> Roll The Dice
+        </div>
+    </div>
+
+    <div id="diceGrid" class="dice-grid"></div>
+
+    <button id="rollButton">🎲 ROLLING 🎲</button>
+
+    <div id="result">🌈 Select 1–30 dice and hit the button! Hear the shake! 🌈</div>
+    
+    <div class="history-container">
+        <div class="history-header">
+            <div class="history-title">📜 ROLL HISTORY (last 10 rolls)</div>
+        </div>
+        <div id="historyList" class="history-list">
+            <div class="history-item" style="opacity:0.7;">✨ No rolls yet. Click ROLLING! ✨</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const colors = [
+        {name:"Red", value:"#ff0000"},
+        {name:"Green", value:"#00aa00"},
+        {name:"Blue", value:"#0066ff"},
+        {name:"Yellow", value:"#ffd700"},
+        {name:"Purple", value:"#9900cc"},
+        {name:"Orange", value:"#ff9900"}
+    ];
+
+    let audioCtx = null;
+    let isAudioAllowed = false;
+    
+    function initAudio() {
+        if (audioCtx) return audioCtx;
+        try {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            return audioCtx;
+        } catch(e) {
+            return null;
+        }
+    }
+    
+    function playRollSound() {
+        if (!isAudioAllowed) return;
+        let ctx = audioCtx;
+        if (!ctx) { ctx = initAudio(); if (!ctx) return; }
+        if (ctx.state === 'suspended') {
+            ctx.resume().then(() => generateSound(ctx)).catch(()=>{});
+        } else {
+            generateSound(ctx);
+        }
+    }
+    
+    function generateSound(ctx) {
+        const now = ctx.currentTime;
+        const gainNode = ctx.createGain();
+        gainNode.connect(ctx.destination);
+        gainNode.gain.setValueAtTime(0.25, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+        const osc1 = ctx.createOscillator();
+        osc1.type = 'triangle';
+        osc1.frequency.value = 180 + Math.random() * 40;
+        osc1.connect(gainNode);
+        osc1.start();
+        osc1.stop(now + 0.2);
+        const osc2 = ctx.createOscillator();
+        osc2.type = 'square';
+        osc2.frequency.value = 520 + Math.random() * 150;
+        const gain2 = ctx.createGain();
+        gain2.gain.setValueAtTime(0.12, now);
+        gain2.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.start();
+        osc2.stop(now + 0.25);
+        const bufferSize = 4096;
+        const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) output[i] = (Math.random() * 2 - 1) * 0.25;
+        const noiseSource = ctx.createBufferSource();
+        noiseSource.buffer = noiseBuffer;
+        const noiseGain = ctx.createGain();
+        noiseGain.gain.setValueAtTime(0.18, now);
+        noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.15);
+        noiseSource.connect(noiseGain);
+        noiseGain.connect(ctx.destination);
+        noiseSource.start();
+        noiseSource.stop(now + 0.15);
+    }
+    
+    function enableAudio() {
+        if (isAudioAllowed) return;
+        const ctx = initAudio();
+        if (ctx && ctx.state === 'suspended') {
+            ctx.resume().then(() => { isAudioAllowed = true; }).catch(()=>{});
+        } else if (ctx) { isAudioAllowed = true; }
+    }
+    
+    const diceGrid = document.getElementById("diceGrid");
+    const quantitySelect = document.getElementById("diceQuantitySelect");
+    const rollBtn = document.getElementById("rollButton");
+    const resultDiv = document.getElementById("result");
+    const historyListDiv = document.getElementById("historyList");
+    
+    let currentDiceElements = [];
+    let activeRollTimeout = null;
+    let activeInterval = null;
+    let rollHistory = [];
+    
+    // Helper: Get color hex by name
+    function getColorHex(colorName) {
+        const found = colors.find(c => c.name === colorName);
+        return found ? found.value : "#ffffff";
+    }
+    
+    function updateHistoryDisplay() {
+        if (!historyListDiv) return;
+        if (rollHistory.length === 0) {
+            historyListDiv.innerHTML = '<div class="history-item" style="opacity:0.7;">✨ No rolls yet. Click ROLLING! ✨</div>';
+            return;
+        }
+        historyListDiv.innerHTML = rollHistory.map(item => {
+            // Create color preview dots
+            let previewHtml = '';
+            if (item.colorData && item.colorData.length > 0) {
+                const previewColors = item.colorData.slice(0, 8); // show first 8 colors preview
+                previewHtml = `<div class="history-color-preview">${previewColors.map(col => 
+                    `<div class="color-dot-mini" style="background-color: ${getColorHex(col)};" title="${col}"></div>`
+                ).join('')}${item.colorData.length > 8 ? `<span style="font-size:10px;">+${item.colorData.length-8}</span>` : ''}</div>`;
+            }
+            return `<div class="history-item">
+                        <strong>🎲 ${item.timestamp}</strong>
+                        ${previewHtml}
+                        <div class="history-text">${item.text}</div>
+                    </div>`;
+        }).join('');
+        historyListDiv.scrollTop = 0;
+    }
+    
+    function addToHistory(text, colorArray) {
+        const now = new Date();
+        const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+        rollHistory.unshift({ timestamp: timeStr, text: text, colorData: colorArray });
+        if (rollHistory.length > 10) rollHistory.pop();
+        updateHistoryDisplay();
+    }
+    
+    function populateDropdown() {
+        quantitySelect.innerHTML = "";
+        for (let i = 1; i <= 30; i++) {
+            const option = document.createElement("option");
+            option.value = i;
+            let label = i === 1 ? "1 die" : `${i} dice`;
+            if (i === 30) label = "30 dice";
+            option.textContent = label;
+            if (i === 4) option.selected = true;
+            quantitySelect.appendChild(option);
+        }
+    }
+    
+    function getRandomColor() {
+        return colors[Math.floor(Math.random() * colors.length)];
+    }
+    
+    function applyAutoScaling(quantity) {
+        diceGrid.setAttribute('data-dice-count', quantity);
+    }
+    
+    function buildDiceGrid(quantity) {
+        if (activeInterval) clearInterval(activeInterval);
+        if (activeRollTimeout) clearTimeout(activeRollTimeout);
+        diceGrid.innerHTML = "";
+        currentDiceElements = [];
+        applyAutoScaling(quantity);
+        for (let i = 0; i < quantity; i++) {
+            const diceDiv = document.createElement("div");
+            diceDiv.classList.add("dice");
+            diceDiv.style.backgroundColor = colors[i % colors.length].value;
+            const dotSpan = document.createElement("div");
+            dotSpan.classList.add("dot");
+            diceDiv.appendChild(dotSpan);
+            diceGrid.appendChild(diceDiv);
+            currentDiceElements.push(diceDiv);
+        }
+        diceGrid.scrollTop = 0;
+        if (quantity > 0) {
+            resultDiv.innerHTML = `🎲 ${quantity} dice ready! (Dice auto-resized for best view) 🎲`;
+        }
+    }
+    
+    function getSelectedQuantity() {
+        return parseInt(quantitySelect.value, 10);
+    }
+    
+    function flashRandomColors() {
+        currentDiceElements.forEach(dice => {
+            const randomCol = getRandomColor();
+            dice.style.backgroundColor = randomCol.value;
+            const dot = dice.querySelector(".dot");
+            if (dot) {
+                dot.style.transform = "scale(1.2)";
+                setTimeout(() => { if (dot) dot.style.transform = ""; }, 70);
+            }
+        });
+    }
+    
+    function rollDiceWithSound() {
+        if (!isAudioAllowed) enableAudio();
+        let currentQty = getSelectedQuantity();
+        if (currentDiceElements.length !== currentQty) buildDiceGrid(currentQty);
+        if (currentDiceElements.length === 0) {
+            resultDiv.innerHTML = "⚠️ No dice! Select a number (1-30).";
+            return;
+        }
+        
+        rollBtn.disabled = true;
+        rollBtn.style.opacity = "0.65";
+        rollBtn.style.cursor = "wait";
+        
+        if (isAudioAllowed || audioCtx) {
+            playRollSound();
+            setTimeout(() => { if (rollBtn.disabled) playRollSound(); }, 180);
+            setTimeout(() => { if (rollBtn.disabled) playRollSound(); }, 380);
+        } else {
+            initAudio();
+            if (audioCtx) audioCtx.resume().then(() => { isAudioAllowed = true; playRollSound(); }).catch(()=>{});
+        }
+        
+        currentDiceElements.forEach(dice => dice.classList.add("rolling-animation"));
+        if (activeInterval) clearInterval(activeInterval);
+        activeInterval = setInterval(() => flashRandomColors(), 75);
+        if (activeRollTimeout) clearTimeout(activeRollTimeout);
+        
+        activeRollTimeout = setTimeout(() => {
+            clearInterval(activeInterval);
+            activeInterval = null;
+            currentDiceElements.forEach(dice => dice.classList.remove("rolling-animation"));
+            
+            const finalResults = [];
+            currentDiceElements.forEach(dice => {
+                const finalColor = getRandomColor();
+                dice.style.backgroundColor = finalColor.value;
+                finalResults.push(finalColor.name);
+            });
+            
+            let resultText = "";
+            let historyText = "";
+            const total = finalResults.length;
+            
+            if (total === 1) {
+                resultText = `🎨 Single die result: ${finalResults[0]} 🎨`;
+                historyText = `${finalResults[0]}`;
+            } else if (total <= 16) {
+                const detailed = finalResults.map((name, idx) => `${idx+1}:${name}`).join(" · ");
+                resultText = `✨ RESULTS (${total} dice) ✨ ${detailed}`;
+                historyText = `${total} dice → ${finalResults.join(", ")}`;
+            } else {
+                const freqMap = new Map();
+                finalResults.forEach(color => freqMap.set(color, (freqMap.get(color) || 0) + 1));
+                const summary = Array.from(freqMap.entries()).map(([col, cnt]) => `${col} ${cnt}`).join(" | ");
+                resultText = `🌈 ROLL (${total} dice) — Color summary: ${summary} 🌈`;
+                historyText = `${total} dice | ${summary}`;
+            }
+            
+            resultDiv.innerHTML = `🎉 ${resultText} 🎉`;
+            
+            // Add to history with the actual color array for preview
+            addToHistory(historyText, finalResults);
+            
+            currentDiceElements.forEach(dice => {
+                dice.style.transform = "scale(1.02)";
+                setTimeout(() => { if (dice) dice.style.transform = ""; }, 120);
+            });
+            
+            rollBtn.disabled = false;
+            rollBtn.style.opacity = "1";
+            rollBtn.style.cursor = "pointer";
+            activeRollTimeout = null;
+        }, 1200);
+    }
+    
+    function init() {
+        populateDropdown();
+        buildDiceGrid(getSelectedQuantity());
+        rollBtn.addEventListener("click", () => {
+            if (!isAudioAllowed) enableAudio();
+            rollDiceWithSound();
+        });
+        quantitySelect.addEventListener("change", () => {
+            if (activeInterval) clearInterval(activeInterval);
+            if (activeRollTimeout) clearTimeout(activeRollTimeout);
+            buildDiceGrid(getSelectedQuantity());
+            rollBtn.disabled = false;
+            rollBtn.style.opacity = "1";
+            const qty = getSelectedQuantity();
+            resultDiv.innerHTML = qty >= 30 ? `🎲 MAX DICE!!! 🎲` : `🎯 Dice count set to ${qty}. 🎯`;
+            applyAutoScaling(qty);
+        });
+        document.body.addEventListener("click", () => {
+            if (!isAudioAllowed) {
+                const ctx = initAudio();
+                if (ctx && ctx.state === 'suspended') ctx.resume().then(() => { isAudioAllowed = true; }).catch(()=>{});
+                else if (ctx) isAudioAllowed = true;
+            }
+        });
+        window.addEventListener('resize', () => applyAutoScaling(getSelectedQuantity()));
+    }
+    
+    init();
+    
+    document.addEventListener("mouseover", (e) => {
+        if (e.target.classList && e.target.classList.contains("dice")) {
+            e.target.style.filter = "brightness(1.12)";
+            e.target.style.transition = "0.07s";
+        }
+    });
+    document.addEventListener("mouseout", (e) => {
+        if (e.target.classList && e.target.classList.contains("dice")) e.target.style.filter = "";
+    });
+    diceGrid.addEventListener("contextmenu", (e) => e.preventDefault());
+</script>
+</body>
+</html>
