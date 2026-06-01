@@ -701,10 +701,6 @@
             if (total === 1) {
                 resultText = `🎨 Single die result: ${finalResults[0]} 🎨`;
                 historyText = `${finalResults[0]}`;
-            } else if (total <= 16) {
-                const detailed = finalResults.map((name, idx) => `${idx+1}:${name}`).join(" · ");
-                resultText = `✨ RESULTS (${total} dice) ✨ ${detailed}`;
-                historyText = `${total} dice → ${finalResults.join(", ")}`;
             } else {
                 const freqMap = new Map();
                 finalResults.forEach(color => freqMap.set(color, (freqMap.get(color) || 0) + 1));
