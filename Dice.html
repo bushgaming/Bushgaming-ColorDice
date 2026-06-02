@@ -321,7 +321,7 @@
             overflow-y: auto;
         }
 
-        /* HISTORY PANEL */
+        /* HISTORY PANEL - FULLY RESPONSIVE */
         .history-container {
             margin-top: 20px;
             background: rgba(0, 0, 0, 0.4);
@@ -341,12 +341,15 @@
             font-size: 1rem;
             padding-bottom: 6px;
             border-bottom: 1px solid rgba(255, 205, 107, 0.5);
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .history-title {
             display: flex;
             align-items: center;
             gap: 8px;
+            font-size: clamp(0.85rem, 4vw, 1rem);
         }
 
         .history-list {
@@ -362,40 +365,47 @@
             background: rgba(0, 0, 0, 0.5);
             border-radius: 24px;
             padding: 8px 14px;
-            font-size: 0.85rem;
+            font-size: clamp(0.7rem, 3.5vw, 0.85rem);
             color: #FFE5B4;
             border-left: 4px solid #ffcd6b;
             text-align: left;
-            font-family: monospace;
+            font-family: 'Segoe UI', system-ui, monospace;
             word-break: break-word;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
             flex-wrap: wrap;
+            transition: all 0.2s;
         }
 
         .history-item strong {
             color: #ffd966;
+            font-size: clamp(0.65rem, 3vw, 0.8rem);
+            white-space: nowrap;
         }
 
         .history-color-preview {
             display: inline-flex;
-            gap: 4px;
+            gap: 3px;
             flex-wrap: wrap;
             align-items: center;
         }
 
         .color-dot-mini {
-            width: 20px;
-            height: 20px;
+            width: clamp(16px, 4vw, 20px);
+            height: clamp(16px, 4vw, 20px);
             border-radius: 4px;
             display: inline-block;
             border: 1px solid rgba(255,255,255,0.3);
             box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            flex-shrink: 0;
         }
 
         .history-text {
             flex: 1;
+            line-height: 1.3;
+            font-size: clamp(0.65rem, 3.2vw, 0.8rem);
+            word-break: break-word;
         }
 
         .history-list::-webkit-scrollbar {
@@ -408,6 +418,76 @@
         .history-list::-webkit-scrollbar-thumb {
             background: #ffcd6b;
             border-radius: 10px;
+        }
+
+        /* Extra small devices */
+        @media (max-width: 550px) {
+            .container {
+                padding: 16px 18px 24px;
+            }
+            
+            h1 {
+                font-size: 1.6rem;
+            }
+            
+            .controls {
+                padding: 8px 16px;
+                gap: 12px;
+            }
+            
+            .dice-count-selector {
+                padding: 4px 16px;
+                gap: 10px;
+            }
+            
+            .dice-count-selector label {
+                font-size: 1rem;
+            }
+            
+            select {
+                font-size: 0.9rem;
+                padding: 5px 12px;
+            }
+            
+            button {
+                font-size: 20px;
+                padding: 12px;
+            }
+            
+            #result {
+                font-size: 0.9rem;
+                padding: 10px 12px;
+            }
+            
+            .history-item {
+                padding: 6px 10px;
+                gap: 6px;
+            }
+            
+            .history-item strong {
+                white-space: normal;
+                word-break: keep-all;
+            }
+            
+            .color-dot-mini {
+                width: 14px;
+                height: 14px;
+            }
+        }
+
+        /* Very small devices */
+        @media (max-width: 400px) {
+            .history-title {
+                font-size: 0.75rem;
+            }
+            
+            .history-text {
+                font-size: 0.6rem;
+            }
+            
+            .history-item strong {
+                font-size: 0.6rem;
+            }
         }
 
         @keyframes crunchyShake {
@@ -574,10 +654,10 @@
             // Create color preview dots
             let previewHtml = '';
             if (item.colorData && item.colorData.length > 0) {
-                const previewColors = item.colorData.slice(0, 8); // show first 8 colors preview
+                const previewColors = item.colorData.slice(0, 6); // show first 6 colors preview for better mobile fit
                 previewHtml = `<div class="history-color-preview">${previewColors.map(col => 
                     `<div class="color-dot-mini" style="background-color: ${getColorHex(col)};" title="${col}"></div>`
-                ).join('')}${item.colorData.length > 8 ? `<span style="font-size:10px;">+${item.colorData.length-8}</span>` : ''}</div>`;
+                ).join('')}${item.colorData.length > 6 ? `<span style="font-size:9px;">+${item.colorData.length-6}</span>` : ''}</div>`;
             }
             return `<div class="history-item">
                         <strong>🎲 ${item.timestamp}</strong>
